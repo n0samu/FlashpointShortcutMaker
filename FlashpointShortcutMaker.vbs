@@ -31,7 +31,7 @@ Do While Not IsUUID(gameID)
 Loop
 
 shortcutFile = desktopDir & "\" & shortcutName & ".lnk"
-clifpArgs = "--auto " & gameID
+clifpArgs = "--quiet --auto " & gameID
 
 Set shortcutObj = wshShell.CreateShortcut(shortcutFile)
 	shortcutObj.TargetPath = clifp
