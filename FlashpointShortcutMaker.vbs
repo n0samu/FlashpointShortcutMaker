@@ -8,18 +8,20 @@ If Not FileExists(clifp) Then
 	WScript.Quit
 End If
 Set wshShell = CreateObject("WScript.Shell")
-desktopDir = wshShell.ExpandEnvironmentStrings("%HOMEDRIVE%%HOMEPATH%") & "\Desktop"
+desktopDir = wshShell.ExpandEnvironmentStrings("%HOMEDRIVE%%HOMEPATH%") & "\Desktop\"
 
-shortcutName = ""
-Do While Not IsKosherFilename(shortcutName) 
-	shortcutName = InputBox("Enter a name for your shortcut.", "Create Flashpoint Shortcut")
-	If shortcutName = "" Then
-		WScript.Quit
-	ElseIf Not IsKosherFilename(shortcutName) Then
-		msgbox "A shortcut cannot contain any of the following characters: \/:*?""<>| Try again."
-    End If
-Loop
+' The shortcut name (uses game title) can now automatically be pulled from database by CLIFp
+'shortcutName = ""
+'Do While Not IsKosherFilename(shortcutName) 
+' 	shortcutName = InputBox("Enter a name for your shortcut.", "Create Flashpoint Shortcut")
+'	If shortcutName = "" Then
+'		WScript.Quit
+'	ElseIf Not IsKosherFilename(shortcutName) Then
+'		msgbox "A shortcut cannot contain any of the following characters: \/:*?""<>| Try again."
+'    End If
+'Loop
 
+' Prompt user for game ID. CLIFp will validate this UUID is present in the database
 gameID = ""
 Do While Not IsUUID(gameID) 
 	gameID = InputBox("Enter the ID of the game or animation.", "Create Flashpoint Shortcut")
@@ -30,16 +32,20 @@ Do While Not IsUUID(gameID)
 	End If
 Loop
 
-shortcutFile = desktopDir & "\" & shortcutName & ".lnk"
-clifpArgs = "--quiet --auto " & gameID
+' Build arguments and launch command
+clifpIDArg = "--id=""" & gameID & """" 
+clifpPathArg = "--path=""" & desktopDir & "\"""
+clifpLinkCmd = """" & clifp & """" & "link " & clifpIDArg & " " & clifpPathArg
 
-Set shortcutObj = wshShell.CreateShortcut(shortcutFile)
-	shortcutObj.TargetPath = clifp
-	shortcutObj.Arguments = clifpArgs
-	shortcutObj.IconLocation = fpLauncher
-shortcutObj.Save
-msgBox "Shortcut saved!"
+' Create shortcut with CLIFp
+statusCode = wshShell.Run(clifpLinkCmd, 1, true)
 
+' Print success message. CLIFp will handle error messages if required
+If statusCode = 0 Then
+	msgBox "Shortcut saved!"
+End	If
+
+' Functions
 Function FileExists(FilePath)
 	Set fso = CreateObject("Scripting.FileSystemObject")
 	If fso.FileExists(FilePath) Then
