@@ -1,4 +1,4 @@
-' Flashpoint Shortcut Maker by nosamu
+' Flashpoint Shortcut Maker by nosamu and oblivioncth
 
 scriptDir = CreateObject("Scripting.FileSystemObject").GetParentFolderName(WScript.ScriptFullName)
 fpLauncher = scriptDir & "\Launcher\Flashpoint.exe"
@@ -8,20 +8,10 @@ If Not FileExists(clifp) Then
 	WScript.Quit
 End If
 Set wshShell = CreateObject("WScript.Shell")
-desktopDir = wshShell.ExpandEnvironmentStrings("%HOMEDRIVE%%HOMEPATH%") & "\Desktop\"
-
-' The shortcut name (uses game title) can now automatically be pulled from database by CLIFp
-'shortcutName = ""
-'Do While Not IsKosherFilename(shortcutName) 
-' 	shortcutName = InputBox("Enter a name for your shortcut.", "Create Flashpoint Shortcut")
-'	If shortcutName = "" Then
-'		WScript.Quit
-'	ElseIf Not IsKosherFilename(shortcutName) Then
-'		msgbox "A shortcut cannot contain any of the following characters: \/:*?""<>| Try again."
-'    End If
-'Loop
+desktopDir = wshShell.ExpandEnvironmentStrings("%HOMEDRIVE%%HOMEPATH%") & "\Desktop"
 
 ' Prompt user for game ID. CLIFp will validate this UUID is present in the database
+' The shortcut name (uses game title) is now automatically pulled from the database by CLIFp
 gameID = ""
 Do While Not IsUUID(gameID) 
 	gameID = InputBox("Enter the ID of the game or animation.", "Create Flashpoint Shortcut")
@@ -34,8 +24,8 @@ Loop
 
 ' Build arguments and launch command
 clifpIDArg = "--id=""" & gameID & """" 
-clifpPathArg = "--path=""" & desktopDir & "\"""
-clifpLinkCmd = """" & clifp & """" & "link " & clifpIDArg & " " & clifpPathArg
+clifpPathArg = "--path=""" & desktopDir & """"
+clifpLinkCmd = """" & clifp & """" & " link " & clifpIDArg & " " & clifpPathArg
 
 ' Create shortcut with CLIFp
 statusCode = wshShell.Run(clifpLinkCmd, 1, true)
@@ -64,18 +54,5 @@ Function IsUUID(strUUID)
 	Set regEx = New RegExp
 	regEx.Pattern = "^({|\()?[A-Fa-f0-9]{8}-([A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}(}|\))?$"
 	IsUUID = regEx.Test(strUUID)
-	Set RegEx = Nothing
-End Function
-
-Function IsKosherFilename(fileName)
-    If fileName = "" Then
-        IsKosherFilename = false
-		Exit Function
-    End If
-
-	Dim regEx
-	Set regEx = New RegExp
-	regEx.Pattern = "[\\\/:*?""<>|]"
-	IsKosherFilename = NOT regEx.Test(fileName)
 	Set RegEx = Nothing
 End Function
